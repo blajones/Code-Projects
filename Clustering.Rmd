@@ -294,6 +294,6 @@ cutheight = EHC_al$height[length(EHC_al$height)-5]
 
 droplot = plot_ggdendro(clustdata, direction = "tb", heightReferece = cutheight, expand.y = 0.2)
 
-droplot
+droplot 
 
 ```
