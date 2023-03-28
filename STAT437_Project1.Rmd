@@ -1,0 +1,299 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+
+```{r}
+library(ggplot2)
+library(scales)
+library(dplyr)
+
+projd = read.csv("C://Users//20jon//Downloads//data_437.csv")
+#head(projd)
+
+gexp2 = projd[, which(as.numeric(colSums(projd != 0)) >= 300)] 
+head(gexp2)
+
+set.seed(123)
+
+gexp3 = gexp2[, sample(ncol(gexp2[, 2:dim(gexp2)[2]]), size=1000, replace = F)]
+
+gexp3 = cbind(gexp3, gexp2$Sample)
+head(gexp3)
+
+projl = read.csv("C://Users//20jon//Downloads//labels_437.csv")
+
+labels1 = projl[sample(nrow(projl), size=30, replace = F), ]
+labels1
+gexpProj1 = merge(x= labels1,y=gexp3,by.x = 'Sample', by.y = 'gexp2$Sample')
+gexpProj1
+
+stdgexpProj1 = scale(gexpProj1[,3:1002], center = TRUE, scale = TRUE)
+
+```
+
+```{R A.2}
+
+set.seed(123)
+rand50 = stdgexpProj1[, sample(ncol(stdgexpProj1), size= 50, replace = F)]
+
+library(cluster)
+ gap = clusGap(t(rand50), kmeans, K.max=10, B=200,
+iter.max= 100)
+k = maxSE(gap$Tab[, "gap"], gap$Tab[, "SE.sim"],
+method="Tibs2001SEmax")
+
+k
+
+clIdx = kmeans(rand50, 1, iter.max = 100, nstart=25, algorithm = c("Hartigan-Wong"))
+
+gexpProj1$Type = factor(gexpProj1$Class)
+gexpProj1$cluster = factor(clIdx$cluster)
+library(ggplot2)
+p1 = ggplot(gexpProj1, aes(rand50[,1],rand50[,2]))+xlab("Gene 1 expression")+ ylab("Gene 2 expression")+theme_bw()+
+geom_point(aes(shape=Type,color=cluster),na.rm = T)+
+theme(legend.position="right")+ ggtitle("Clustering via 50 features")+ theme(plot.title = element_text(hjust = 0.5))
+
+labels1$prediction = clIdx$cluster
+table(labels1[,2:3])
+
+p1
+```
+
+```{R A.2.2}
+set.seed(123)
+
+kout = kmeans(rand50, 1, iter.max = 100, nstart=25, algorithm = c("Hartigan-Wong"))
+k1 = kout$tot.withinss
+k1
+
+gexpProj1$cluster = factor(kout$cluster)
+ggplot(gexpProj1,aes(rand50[,1],rand50[,2]))+xlab("Gene 1 expression")+ ylab("Gene 2 expression")+theme_bw()+geom_point(aes(shape=Type,color=cluster),na.rm = T)+ theme(legend.position="right")+ ggtitle("Clustering via 50 features")+ theme(plot.title = element_text(hjust = 0.5))
+
+kout = kmeans(rand50, 2, iter.max = 100, nstart=25, algorithm = c("Hartigan-Wong"))
+k2 = kout$tot.withinss
+k2
+
+gexpProj1$cluster = factor(kout$cluster)
+ggplot(gexpProj1,aes(rand50[,1],rand50[,2]))+xlab("Gene 1 expression")+ ylab("Gene 2 expression")+theme_bw()+geom_point(aes(shape=Type,color=cluster),na.rm = T)+ theme(legend.position="right")+ ggtitle("Clustering via 50 features")+ theme(plot.title = element_text(hjust = 0.5))
+
+kout = kmeans(rand50, 3, iter.max = 100, nstart=25, algorithm = c("Hartigan-Wong"))
+k3 = kout$tot.withinss
+k3
+
+gexpProj1$cluster = factor(kout$cluster)
+ggplot(gexpProj1,aes(rand50[,1],rand50[,2]))+xlab("Gene 1 expression")+ ylab("Gene 2 expression")+theme_bw()+geom_point(aes(shape=Type,color=cluster),na.rm = T)+ theme(legend.position="right")+ ggtitle("Clustering via 50 features")+ theme(plot.title = element_text(hjust = 0.5))
+
+kout = kmeans(rand50, 4, iter.max = 100, nstart=25, algorithm = c("Hartigan-Wong"))
+k4 = kout$tot.withinss
+k4
+
+gexpProj1$cluster = factor(kout$cluster)
+ggplot(gexpProj1,aes(rand50[,1],rand50[,2]))+xlab("Gene 1 expression")+ ylab("Gene 2 expression")+theme_bw()+geom_point(aes(shape=Type,color=cluster),na.rm = T)+ theme(legend.position="right")+ ggtitle("Clustering via 50 features")+ theme(plot.title = element_text(hjust = 0.5))
+
+kout = kmeans(rand50, 5, iter.max = 100, nstart=25, algorithm = c("Hartigan-Wong"))
+k5 = kout$tot.withinss
+k5
+
+gexpProj1$cluster = factor(kout$cluster)
+ggplot(gexpProj1,aes(rand50[,1],rand50[,2]))+xlab("Gene 1 expression")+ ylab("Gene 2 expression")+theme_bw()+geom_point(aes(shape=Type,color=cluster),na.rm = T)+ theme(legend.position="right")+ ggtitle("Clustering via 50 features")+ theme(plot.title = element_text(hjust = 0.5))
+
+kout = kmeans(rand50, 6, iter.max = 100, nstart=25, algorithm = c("Hartigan-Wong"))
+k6 = kout$tot.withinss
+k6
+
+gexpProj1$cluster = factor(kout$cluster)
+ggplot(gexpProj1,aes(rand50[,1],rand50[,2]))+xlab("Gene 1 expression")+ ylab("Gene 2 expression")+theme_bw()+geom_point(aes(shape=Type,color=cluster),na.rm = T)+ theme(legend.position="right")+ ggtitle("Clustering via 50 features")+ theme(plot.title = element_text(hjust = 0.5))
+
+kout = kmeans(rand50, 7, iter.max = 100, nstart=25, algorithm = c("Hartigan-Wong"))
+k7 = kout$tot.withinss
+k7
+
+gexpProj1$cluster = factor(kout$cluster)
+ggplot(gexpProj1,aes(rand50[,1],rand50[,2]))+xlab("Gene 1 expression")+ ylab("Gene 2 expression")+theme_bw()+geom_point(aes(shape=Type,color=cluster),na.rm = T)+ theme(legend.position="right")+ ggtitle("Clustering via 50 features")+ theme(plot.title = element_text(hjust = 0.5))
+
+kout = kmeans(rand50, 8, iter.max = 100, nstart=25, algorithm = c("Hartigan-Wong"))
+k8 = kout$tot.withinss
+k8
+
+gexpProj1$cluster = factor(kout$cluster)
+ggplot(gexpProj1,aes(rand50[,1],rand50[,2]))+xlab("Gene 1 expression")+ ylab("Gene 2 expression")+theme_bw()+geom_point(aes(shape=Type,color=cluster),na.rm = T)+ theme(legend.position="right")+ ggtitle("Clustering via 50 features")+ theme(plot.title = element_text(hjust = 0.5))
+
+kout = kmeans(rand50, 9, iter.max = 100, nstart=25, algorithm = c("Hartigan-Wong"))
+k9 = kout$tot.withinss
+k9
+
+gexpProj1$cluster = factor(kout$cluster)
+ggplot(gexpProj1,aes(rand50[,1],rand50[,2]))+xlab("Gene 1 expression")+ ylab("Gene 2 expression")+theme_bw()+geom_point(aes(shape=Type,color=cluster),na.rm = T)+ theme(legend.position="right")+ ggtitle("Clustering via 50 features")+ theme(plot.title = element_text(hjust = 0.5))
+
+kout = kmeans(rand50, 10, iter.max = 100, nstart=25, algorithm = c("Hartigan-Wong"))
+k10 = kout$tot.withinss
+k10
+
+
+vec1 = c(k1, k2, k3, k4, k5, k6, k7, k8, k9, k10)
+
+gexpProj1$cluster = factor(kout$cluster)
+ggplot(gexpProj1,aes(rand50[,1],rand50[,2]))+xlab("Gene 1 expression")+ ylab("Gene 2 expression")+theme_bw()+geom_point(aes(shape=Type,color=cluster),na.rm = T)+ theme(legend.position="right")+ ggtitle("Clustering via 50 features")+ theme(plot.title = element_text(hjust = 0.5))
+
+plot(vec1,type = "o",col = "blue", xlab = "K", ylab = "W(k)", main = "W(k) against k")
+
+```
+
+```{R A.2.3}
+
+set.seed(123)
+rand250 = stdgexpProj1[, sample(ncol(stdgexpProj1), size= 250, replace = F)]
+
+gap = clusGap(t(rand250), kmeans, K.max=10, B=200,
+iter.max= 100)
+k = maxSE(gap$Tab[, "gap"], gap$Tab[, "SE.sim"],
+method="Tibs2001SEmax")
+
+k
+
+clIdx = kmeans(rand250, 3, iter.max = 100, nstart=25, algorithm = c("Hartigan-Wong"))
+
+gexpProj1$Type = factor(gexpProj1$Class)
+gexpProj1$cluster = factor(clIdx$cluster)
+
+p2 = ggplot(gexpProj1, aes(rand250[,1],rand250[,2]))+xlab("Gene 1 expression")+ ylab("Gene 2 expression")+theme_bw()+
+geom_point(aes(shape=Type,color=cluster),na.rm = T)+
+theme(legend.position="right")+ ggtitle("Clustering via 250 features")+ theme(plot.title = element_text(hjust = 0.5))
+
+p2
+
+```
+
+```{R A.2.3.2}
+
+set.seed(123)
+
+kout = kmeans(rand250, 1, iter.max = 100, nstart=25, algorithm = c("Hartigan-Wong"))
+k11 = kout$tot.withinss
+k11
+
+gexpProj1$cluster = factor(kout$cluster)
+ggplot(gexpProj1,aes(rand250[,1],rand250[,2]))+xlab("Gene 1 expression")+ ylab("Gene 2 expression")+theme_bw()+geom_point(aes(shape=Type,color=cluster),na.rm = T)+ theme(legend.position="right")+ ggtitle("Clustering via 250 features")+ theme(plot.title = element_text(hjust = 0.5))
+
+kout = kmeans(rand250, 2, iter.max = 100, nstart=25, algorithm = c("Hartigan-Wong"))
+k12 = kout$tot.withinss
+k12
+
+gexpProj1$cluster = factor(kout$cluster)
+ggplot(gexpProj1,aes(rand250[,1],rand250[,2]))+xlab("Gene 1 expression")+ ylab("Gene 2 expression")+theme_bw()+geom_point(aes(shape=Type,color=cluster),na.rm = T)+ theme(legend.position="right")+ ggtitle("Clustering via 250 features")+ theme(plot.title = element_text(hjust = 0.5))
+
+kout = kmeans(rand250, 3, iter.max = 100, nstart=25, algorithm = c("Hartigan-Wong"))
+k13 = kout$tot.withinss
+k13
+
+gexpProj1$cluster = factor(kout$cluster)
+ggplot(gexpProj1,aes(rand250[,1],rand250[,2]))+xlab("Gene 1 expression")+ ylab("Gene 2 expression")+theme_bw()+geom_point(aes(shape=Type,color=cluster),na.rm = T)+ theme(legend.position="right")+ ggtitle("Clustering via 250 features")+ theme(plot.title = element_text(hjust = 0.5))
+
+kout = kmeans(rand250, 4, iter.max = 100, nstart=25, algorithm = c("Hartigan-Wong"))
+k14 = kout$tot.withinss
+k14
+
+gexpProj1$cluster = factor(kout$cluster)
+ggplot(gexpProj1,aes(rand250[,1],rand250[,2]))+xlab("Gene 1 expression")+ ylab("Gene 2 expression")+theme_bw()+geom_point(aes(shape=Type,color=cluster),na.rm = T)+ theme(legend.position="right")+ ggtitle("Clustering via 250 features")+ theme(plot.title = element_text(hjust = 0.5))
+
+kout = kmeans(rand250, 5, iter.max = 100, nstart=25, algorithm = c("Hartigan-Wong"))
+k15 = kout$tot.withinss
+k15
+
+gexpProj1$cluster = factor(kout$cluster)
+ggplot(gexpProj1,aes(rand250[,1],rand250[,2]))+xlab("Gene 1 expression")+ ylab("Gene 2 expression")+theme_bw()+geom_point(aes(shape=Type,color=cluster),na.rm = T)+ theme(legend.position="right")+ ggtitle("Clustering via 250 features")+ theme(plot.title = element_text(hjust = 0.5))
+
+kout = kmeans(rand250, 6, iter.max = 100, nstart=25, algorithm = c("Hartigan-Wong"))
+k16 = kout$tot.withinss
+k16
+
+gexpProj1$cluster = factor(kout$cluster)
+ggplot(gexpProj1,aes(rand250[,1],rand250[,2]))+xlab("Gene 1 expression")+ ylab("Gene 2 expression")+theme_bw()+geom_point(aes(shape=Type,color=cluster),na.rm = T)+ theme(legend.position="right")+ ggtitle("Clustering via 250 features")+ theme(plot.title = element_text(hjust = 0.5))
+
+kout = kmeans(rand250, 7, iter.max = 100, nstart=25, algorithm = c("Hartigan-Wong"))
+k17 = kout$tot.withinss
+k17
+
+gexpProj1$cluster = factor(kout$cluster)
+ggplot(gexpProj1,aes(rand250[,1],rand250[,2]))+xlab("Gene 1 expression")+ ylab("Gene 2 expression")+theme_bw()+geom_point(aes(shape=Type,color=cluster),na.rm = T)+ theme(legend.position="right")+ ggtitle("Clustering via 250 features")+ theme(plot.title = element_text(hjust = 0.5))
+
+kout = kmeans(rand250, 8, iter.max = 100, nstart=25, algorithm = c("Hartigan-Wong"))
+k18 = kout$tot.withinss
+k18
+
+gexpProj1$cluster = factor(kout$cluster)
+ggplot(gexpProj1,aes(rand250[,1],rand250[,2]))+xlab("Gene 1 expression")+ ylab("Gene 2 expression")+theme_bw()+geom_point(aes(shape=Type,color=cluster),na.rm = T)+ theme(legend.position="right")+ ggtitle("Clustering via 250 features")+ theme(plot.title = element_text(hjust = 0.5))
+
+kout = kmeans(rand250, 9, iter.max = 100, nstart=25, algorithm = c("Hartigan-Wong"))
+k19 = kout$tot.withinss
+k19
+
+gexpProj1$cluster = factor(kout$cluster)
+ggplot(gexpProj1,aes(rand250[,1],rand250[,2]))+xlab("Gene 1 expression")+ ylab("Gene 2 expression")+theme_bw()+geom_point(aes(shape=Type,color=cluster),na.rm = T)+ theme(legend.position="right")+ ggtitle("Clustering via 250 features")+ theme(plot.title = element_text(hjust = 0.5))
+
+kout = kmeans(rand250, 10, iter.max = 100, nstart=25, algorithm = c("Hartigan-Wong"))
+k20 = kout$tot.withinss
+k20
+
+
+vec2 = c(k11, k12, k13, k14, k15, k16, k17, k18, k19, k20)
+
+gexpProj1$cluster = factor(kout$cluster)
+ggplot(gexpProj1,aes(rand250[,1],rand250[,2]))+xlab("Gene 1 expression")+ ylab("Gene 2 expression")+theme_bw()+geom_point(aes(shape=Type,color=cluster),na.rm = T)+ theme(legend.position="right")+ ggtitle("Clustering via 250 features")+ theme(plot.title = element_text(hjust = 0.5))
+
+plot(vec2,type = "o",col = "blue", xlab = "K", ylab = "W(k)", main = "W(k) against k")
+
+```
+
+```{R A.3}
+
+set.seed(123)
+
+hc.complete=hclust(dist(rand250), method="complete")
+hc.average=hclust(dist(rand250), method="average")
+hc.single=hclust(dist(rand250), method="single")
+par(mfrow=c(1,3))
+plot(hc.complete,main="Complete Linkage",xlab="",sub="",cex=.9)
+abline(h=2.5, col="red")
+plot(hc.average, main="Average Linkage",xlab="",sub="",cex=.9)
+abline(h=2.5, col="red")
+plot(hc.single, main="Single Linkage",xlab="",sub="",cex=.9)
+abline(h=2.5, col="red")
+
+
+dmat = dist(rand250)
+length(dmat)
+
+EHC_al = hclust(dmat, method = "average")
+library(ggdendro)
+ggdendrogram(EHC_al, rotate = F)
+
+length(unique(labels1$Class))
+source("Plotggdendro.r")
+
+clustdata = dendro_data_k(EHC_al, 5)
+clustdata$labels$label = paste(as.character(gexpProj1$Class), clustdata$labels$label, sep = " ")
+
+cutheight = EHC_al$height[length(EHC_al$height)-5]
+
+droplot = plot_ggdendro(clustdata, direction = "tb", heightReferece = cutheight, expand.y = 0.2)
+
+droplot
+
+```
