@@ -51,4 +51,4 @@ while i <11:
     print(y_pred)
     i += 1
 #x_pred = ['Yes']
-#print("Accuracy:",metrics.accuracy_score(x_pred, y_pred),)
+#print("Accuracy:",metrics.accuracy_score(x_pred, y_pred),)     
