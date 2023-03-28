@@ -1,0 +1,126 @@
+---
+title: "Stat 437 HW1"
+author: "Blake Jones (11697344)"
+header-includes:
+- \usepackage{bbm}
+- \usepackage{amssymb}
+- \usepackage{amsmath}
+- \usepackage{graphicx,float}
+- \usepackage{natbib}
+output:
+  word_document: default
+  pdf_document: default
+fontsize: 11pt
+---
+
+```{r, echo=FALSE, warning=FALSE}
+library(knitr)
+opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE)
+```
+
+# General rule
+
+Please show your work and submit your computer codes in order to get points. Providing correct answers without supporting details does not receive full credits. This HW covers:
+
+- The basics of `dplyr`
+- Creating scatter plot using `ggplot2`
+- Elementary Visualizations (via ggplot2): density plot, histogram, boxplot, barplot, pie chart
+- Advanced Visualizations via ggplot2: faceting, annotation
+
+For an assignment or project, you DO NOT have to submit your answers or reports using typesetting software. However, your answers must be well organized and well legible for grading. Please upload your answers in a document to the course space. Specifically, if you are not able to knit a .Rmd/.rmd file into an output file such as a .pdf, .doc, .docx or .html file that contains your codes, outputs from your codes, your interpretations on the outputs, and your answers in text (possibly with math expressions), please organize your codes, their outputs and your answers in a document in the format given below:
+
+```
+Problem or task or question ... 
+Codes ...
+Outputs ...
+Your interpretations ...
+```
+
+It is absolutely not OK to just submit your codes only. This will result in a considerable loss of points on your assignments or projects. 
+
+# Problem 1
+
+Please refer to the NYC flight data `nycflights13` that has been discussed in the lecture notes and whose manual can be found at https://cran.r-project.org/web/packages/nycflights13/index.html. We will use `flights`, a tibble from `nycflights13`.
+
+
+You are interested in looking into the average `arr_delay` for 6 different `month` 12, 1, 2, 6, 7 and 8, for 3 different `carrier` "UA", "AA" and "DL", and for `distance` that are greater than 700 miles, since you suspect that colder months and longer distances may result in longer average arrival delays. Note that you need to extract observations from `flights` and obtain the needed sample means for `arr_delay`, and that you are requird to use `dplyr` for this purpose.
+
+The following tasks and questions are based on the extracted observations.
+
+```{R pre}
+
+library(dplyr)
+library(ggplot2)
+library(scales)
+
+data = nycflights13::flights
+
+data = data %>% filter(month %in% c(12,1,2,6,7,8,3) & carrier %in% c("UA", "AA", "DL") & distance > 700 & !is.na(arr_delay)) %>% select(month, carrier, distance, arr_delay)
+
+head(data)
+
+```
+
+(1.a) In a single plot, create a density plot for `arr_delay` for each of the 6 months with `color` aesthetic designated by `month`. Note that you need to convert `month` into a factor in order to create the plot. What can you say about the average `arr_delay` across the 6 months?
+
+```{R 1}
+data$month = as.factor(data$month)
+
+ggplot(data, aes(x = arr_delay, color = month)) + geom_density(linetype = "dashed") + theme_minimal() + ggtitle("Arrival Delays by Month")
+
+```
+
+Based on this density plot, we can see that the average arrival delay for each of the six months centers around zero. It is hard to see because all months center around zero, but it looks like months 6, 7, and 12's right tail may be more fat-tailed than the other months, possibly indicating a higher density away from the arrival delay centering around zero.
+
+(1.b) In a single plot, create a boxplot for `arr_delay` for each of the 3 carriers. What can you say about the average `arr_delay` for the 3 carriers?
+
+```{R 2}
+
+ggplot(data, aes(x = carrier, y = arr_delay)) +
+    geom_boxplot() + stat_summary(fun.y = mean, geom = "point", shape = 23, size = 4) + labs(title = "Boxplots of Arrival Delay by Carrier", x = "Carrier", y = "Arrival Delay")
+
+check = data %>% filter(month %in% c(12, 1, 2, 6, 7, 8) & carrier %in% c("UA", "AA", "DL") & distance > 700) %>% group_by(carrier) %>%
+summarise(mean_arr_delay = mean(arr_delay, na.rm = TRUE))
+check
+```
+
+
+All of the average arrival delays are low in value. American and Delta airlines have a lot of outliers that are more spread apart, possibly raising the average values for those airlines. Even though American (AA) has quite a few outliers, it has the lowest average arrival delay while Delta (DL) has the second lowest. United airlines (UA) has the largest average arrival delay at approximately 7.6 minutes.
+
+(1.c) Create a pie chart for the 3 carriers where the percentages are the proportions of observations for each carrier and where percentages are superimposed on the sectors of the pie chart disc.
+```{R 3}
+
+data2 = data %>% group_by(carrier) %>% dplyr::count() %>% ungroup() %>% mutate(percentage = n/sum(n)) %>% dplyr::arrange(desc(carrier))
+
+data2$labels = scales::percent(data2$percentage)
+
+ggplot(data2, aes(x = "", y = percentage, fill = carrier)) + geom_bar(stat = "identity", width = 1)+ theme_void() + geom_text(aes(label = labels), position = position_stack(vjust = 0.5)) + coord_polar("y", start = 0) + labs(title = "Proportion of Observations by Carrier") 
+```
+
+(1.d) Plot `arr_delay` against `distance` with `facet_grid` designated by `month` and `carrier`.
+```{R 4}
+
+ggplot(data, aes(x = distance, y = arr_delay)) +
+    geom_point() + facet_grid(month ~ carrier) +
+    labs(title = "Arrival Delay Against Distance by Month and Carrier", x = "Distance", y = "Arrival Delay")
+
+```
+(1.e) For each feasible combination of values of `month` and `carrier`, compute the sample average of `arr_delay` and save them into the variable `mean_arr_delay`, and compute the sample average of `distance` and save these averages into the variable `mean_distance`. Plot `month` against `mean_arr_delay` with `shape` designated by `carrier` and `color` by `mean_distance` and annotate each point by its associated `carrier` name. 
+
+```{R 5}
+data3 = data %>% filter(month %in% c(12, 1, 2, 6, 7, 8) & carrier %in% c("UA", "AA", "DL") & distance > 700) %>% group_by(month, carrier) %>%
+summarise(AVG_Arrival_Delay = mean(arr_delay, na.rm = TRUE), AVG_Distance = mean(distance))
+
+ggplot(data3, aes(x = month, y = AVG_Arrival_Delay, shape = carrier, color = AVG_Distance)) + geom_point() + labs(title = "Mean Arrival Delay by Month and Carrier", x = "Month", y = "Mean Arrival Delay") + geom_text(aes(label= data3$carrier), nudge_y = -1.5, nudge_x = -.25)
+
+```
+# Problem 2
+
+Please refer to the data set `mpg` that is available from the `ggplot2` package. Plot `displ` against `hwy` with faceting by `drv` and `cyl`, `color` disgnated by `class`, and `shape` by `trans`. This illustrates visualization with 4 factors.
+
+```{R 2.1}
+
+set2 = mpg %>% select(displ, hwy, drv, cyl, class, trans)
+
+ggplot(set2, aes(x = displ, y = hwy, color = class, shape = trans)) + geom_point() + facet_grid(drv ~ cyl) + labs(title = "Displacement vs MPG by Drive and Cylinders", x = "Engine Displacement", y = "Highway MPG") + scale_shape_manual(values = 1:length(unique(set2$trans)), name = "Transmission Type") + scale_color_discrete(name = "Vehicle Class") 
+```
