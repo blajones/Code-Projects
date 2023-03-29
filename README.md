@@ -1,5 +1,9 @@
 # Code-Projects
 
+This repository contains projects that I've worked on the last two years. The projects are based in machine learning, visualization, and exploratory data analysis. Projects are written in python and R code.
+
+# Project Descriptions
+
 * Altuve_ML.py predicts whether or not Jose Altuve will get a base hit using decision tree classification.
 * Altuve_Random_Forest.py predicts whether or not Jose Altuve will get a base hit using random forest classification.
 * Baseball Player Similarity & More.py allows the user to type in a player name and will be provided visualizations showing the most similar players by stats. At the end it is also shown the similarities between Julio Rodriguez and other top hitters, as well as a linear regression between on-base percentage and batting average and their effect on wins. 
